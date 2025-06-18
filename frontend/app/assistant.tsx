@@ -18,7 +18,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { useRef } from "react";
 
 // 封装与 LangGraph API 的交互逻辑
-import { createThread, getThreadState, sendMessage } from "@/lib/chatApi";
+import { createThread, getThreadState, sendMessage, getThreadsList, deleteThread } from "@/lib/chatApi";
 
 export const Assistant = () => {
 

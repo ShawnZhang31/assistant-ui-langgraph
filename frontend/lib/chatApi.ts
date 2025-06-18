@@ -28,6 +28,17 @@ export const getThreadState = async (
   return client.threads.getState(threadId);
 };
 
+// Function to get all threads list
+export const getThreadsList = async () => {
+  const client = createClient();
+  return client.threads.search();
+};
+
+// Function to delete a thread by its ID
+export const deleteThread = async (threadId: string) => {
+  const client = createClient();
+  return client.threads.delete(threadId);
+};
 
 // Function to send a message in a thread, optionally with a command
 export const sendMessage = async (params: {
