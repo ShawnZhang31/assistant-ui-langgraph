@@ -20,6 +20,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 // 封装与 LangGraph API 的交互逻辑
 import { createThread, getThreadState, sendMessage, getThreadsList, deleteThread } from "@/lib/chatApi";
 import { ThreadManagerProvider, useThreadManager } from "@/components/assistant-ui/thread-manager";
+import { extractMessagesFromThreadState, validateThreadId, logThreadOperation } from "@/lib/threadDebug";
 
 export const Assistant = () => {
   return (
@@ -50,35 +51,70 @@ const AssistantWithThreadManager = () => {
 
     // 向 LangGraph assistant 发送消息
     stream: async (messages, { command }) => {
-      if (!threadIdRef.current) {
-        const { thread_id } = await createThread();
-        threadIdRef.current = thread_id;
-        addThread(thread_id); // 使用真实的thread_id
+      try {
+        if (!threadIdRef.current) {
+          const { thread_id } = await createThread();
+          threadIdRef.current = thread_id;
+          addThread(thread_id); // 使用真实的thread_id
+        }
+        const threadId = threadIdRef.current;
+        return sendMessage({
+          threadId,
+          messages,
+          command,
+        });
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        throw error; // 重新抛出错误，让上层处理
       }
-      const threadId = threadIdRef.current;
-      return sendMessage({
-        threadId,
-        messages,
-        command,
-      });
     },
 
     // 用户重置对话时创建新线程
     onSwitchToNewThread: async () => {
-      const { thread_id } = await createThread();
-      // 创建新线程后更新 threadIdRef
-      threadIdRef.current = thread_id;
-      addThread(thread_id); // 使用真实的thread_id
+      try {
+        const { thread_id } = await createThread();
+        // 创建新线程后更新 threadIdRef
+        threadIdRef.current = thread_id;
+        addThread(thread_id); // 使用真实的thread_id
+      } catch (error) {
+        console.error('Failed to create new thread:', error);
+        throw error; // 重新抛出错误，让上层处理
+      }
     },
 
     // 切换到已有线程时的处理
     onSwitchToThread: async (threadId) => {
-      const state = await getThreadState(threadId);
-      // 切换到指定线程时，更新 threadIdRef 并返回当前线程的消息状态
-      threadIdRef.current = threadId;
-      setCurrentThread(threadId); // 更新ThreadManager的当前Thread
-      updateThreadActivity(threadId); // 更新Thread活跃状态
-      return { messages: state.values.messages };
+      logThreadOperation(threadId, 'switch_start');
+      
+      if (!validateThreadId(threadId)) {
+        console.error('Invalid thread ID provided to onSwitchToThread:', threadId);
+        return { messages: [] };
+      }
+      
+      try {
+        const state = await getThreadState(threadId);
+        logThreadOperation(threadId, 'state_retrieved', state);
+        
+        // 切换到指定线程时，更新 threadIdRef 并返回当前线程的消息状态
+        threadIdRef.current = threadId;
+        setCurrentThread(threadId); // 更新ThreadManager的当前Thread
+        updateThreadActivity(threadId); // 更新Thread活跃状态
+        
+        // 使用专门的工具函数来安全地提取消息
+        const messages = extractMessagesFromThreadState(state);
+        
+        logThreadOperation(threadId, 'switch_complete', { messageCount: messages.length });
+        return { messages };
+      } catch (error) {
+        console.error('Failed to switch to thread:', threadId, error);
+        logThreadOperation(threadId, 'switch_error', error);
+        
+        // 如果获取Thread状态失败，返回空数组避免错误
+        threadIdRef.current = threadId;
+        setCurrentThread(threadId);
+        updateThreadActivity(threadId);
+        return { messages: [] };
+      }
     },
   });
 

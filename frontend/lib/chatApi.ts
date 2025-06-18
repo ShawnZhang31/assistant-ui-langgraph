@@ -21,11 +21,16 @@ export const createThread = async () => {
 };
 
 // Function to get the state of a thread by its ID
-export const getThreadState = async (
-  threadId: string
-): Promise<ThreadState<{ messages: LangChainMessage[] }>> => {
+export const getThreadState = async (threadId: string) => {
   const client = createClient();
-  return client.threads.getState(threadId);
+  try {
+    const state = await client.threads.getState(threadId);
+    console.log('Thread state for', threadId, ':', JSON.stringify(state, null, 2));
+    return state;
+  } catch (error) {
+    console.error('Failed to get thread state for', threadId, ':', error);
+    throw error;
+  }
 };
 
 // Function to get all threads list

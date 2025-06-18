@@ -26,13 +26,16 @@ export const EnhancedThreadList: FC = () => {
   // 切换到指定Thread
   const handleSwitchToThread = async (threadId: string) => {
     try {
+      console.log('Attempting to switch to thread:', threadId);
       // 调用runtime的switchToThread来切换并恢复历史消息
       await runtime.switchToThread(threadId);
       updateThreadActivity(threadId);
+      console.log('Successfully switched to thread:', threadId);
     } catch (error) {
-      console.error("Failed to switch to thread:", error);
+      console.error("Failed to switch to thread:", threadId, error);
       // 即使runtime调用失败，我们也更新本地状态
       updateThreadActivity(threadId);
+      // 可以考虑显示一个用户友好的错误提示
     }
   };
 
