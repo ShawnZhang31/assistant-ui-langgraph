@@ -15,15 +15,34 @@ import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
 // 用于记录当前对话线程ID（避免每次组件重新渲染都重新生成）
-import { useRef } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 
 // 封装与 LangGraph API 的交互逻辑
 import { createThread, getThreadState, sendMessage, getThreadsList, deleteThread } from "@/lib/chatApi";
+import { ThreadManagerProvider, useThreadManager } from "@/components/assistant-ui/thread-manager";
 
 export const Assistant = () => {
+  return (
+    <ThreadManagerProvider>
+      <AssistantWithThreadManager />
+    </ThreadManagerProvider>
+  );
+};
+
+const AssistantWithThreadManager = () => {
+  const { addThread, setCurrentThread, updateThreadActivity, currentThreadId } = useThreadManager();
 
   // threadIdRef 用于保存当前对话的线程 ID，确保在页面刷新前是持续一致的。
   const threadIdRef = useRef<string | undefined>(undefined);
+
+  // 从localStorage恢复当前Thread ID并设置到threadIdRef
+  useEffect(() => {
+    const savedThreadId = localStorage.getItem('current-thread-id');
+    if (savedThreadId) {
+      threadIdRef.current = savedThreadId;
+      setCurrentThread(savedThreadId); // 确保ThreadManager也知道当前的Thread
+    }
+  }, [setCurrentThread]);
 
   // 初始化 runtime，传入当前线程ID
   const runtime = useLangGraphRuntime({
@@ -34,6 +53,7 @@ export const Assistant = () => {
       if (!threadIdRef.current) {
         const { thread_id } = await createThread();
         threadIdRef.current = thread_id;
+        addThread(thread_id); // 使用真实的thread_id
       }
       const threadId = threadIdRef.current;
       return sendMessage({
@@ -48,6 +68,7 @@ export const Assistant = () => {
       const { thread_id } = await createThread();
       // 创建新线程后更新 threadIdRef
       threadIdRef.current = thread_id;
+      addThread(thread_id); // 使用真实的thread_id
     },
 
     // 切换到已有线程时的处理
@@ -55,6 +76,8 @@ export const Assistant = () => {
       const state = await getThreadState(threadId);
       // 切换到指定线程时，更新 threadIdRef 并返回当前线程的消息状态
       threadIdRef.current = threadId;
+      setCurrentThread(threadId); // 更新ThreadManager的当前Thread
+      updateThreadActivity(threadId); // 更新Thread活跃状态
       return { messages: state.values.messages };
     },
   });
