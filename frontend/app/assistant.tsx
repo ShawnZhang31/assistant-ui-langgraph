@@ -152,8 +152,7 @@ const AssistantWithThreadManager = () => {
         </SidebarInset>
       </SidebarProvider>
       </div>
-      {/* <div className="flex-1 flex flex-col"> */}
-        <footer className="border-t px-4 py-3 text-center text-sm text-muted-foreground">
+        <footer className="border-t px-4 py-3 text-center text-sm text-muted-foreground bg-background relative z-50">
           Developed by JoinAI Team using assistant-ui
         </footer>
       </div>
