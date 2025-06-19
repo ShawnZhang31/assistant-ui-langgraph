@@ -124,6 +124,8 @@ const AssistantWithThreadManager = () => {
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
+      <div className="flex flex-col min-h-screen">
+      <div className="flex-1">
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
@@ -149,6 +151,12 @@ const AssistantWithThreadManager = () => {
           <Thread />
         </SidebarInset>
       </SidebarProvider>
+      </div>
+      {/* <div className="flex-1 flex flex-col"> */}
+        <footer className="border-t px-4 py-3 text-center text-sm text-muted-foreground">
+          Developed by JoinAI Team using assistant-ui
+        </footer>
+      </div>
     </AssistantRuntimeProvider>
   );
 };
