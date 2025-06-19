@@ -46,3 +46,28 @@ export const getThreadDescription = (threadId: string, createdAt: string): strin
     return `${diffInDays}d ago`;
   }
 };
+
+/**
+ * 格式化时间为相对时间显示（xx minutes ago, xx hours ago, xx days ago）
+ * @param timestamp ISO时间戳字符串
+ * @returns 格式化后的相对时间字符串
+ */
+export const formatRelativeTime = (timestamp: string): string => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  
+  if (diffInMinutes < 1) {
+    return 'just now';
+  } else if (diffInMinutes < 60) {
+    return `${diffInMinutes} ${diffInMinutes === 1 ? 'min' : 'mins'} ago`;
+  } else if (diffInHours < 24) {
+    return `${diffInHours} ${diffInHours === 1 ? 'hr' : 'hrs'} ago`;
+  } else {
+    return `${diffInDays} ${diffInDays === 1 ? 'd' : 'ds'} ago`;
+  }
+};

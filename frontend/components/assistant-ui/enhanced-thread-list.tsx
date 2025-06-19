@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { useThreadManager } from "./thread-manager";
 import { deleteThread } from "@/lib/chatApi";
-import { getThreadDescription } from "@/lib/threadUtils";
+import { getThreadDescription, formatRelativeTime } from "@/lib/threadUtils";
 
 export const EnhancedThreadList: FC = () => {
   const { threads, currentThreadId, loading, addThread, removeThread, updateThreadActivity } = useThreadManager();
@@ -85,9 +85,13 @@ export const EnhancedThreadList: FC = () => {
             >
               <div className="flex flex-col">
                 <span className="text-sm font-medium">{thread.title}</span>
-                <span className="text-xs text-muted-foreground">
+                {/* <span className="text-xs text-muted-foreground">
                   {getThreadDescription(thread.id, thread.createdAt)}
-                </span>
+                </span> */}
+                <div className="flex gap-0.1 text-xs text-muted-foreground">
+                  <span>Created: {formatRelativeTime(thread.createdAt)}</span>
+                  <span>Updated: {formatRelativeTime(thread.lastActive)}</span>
+                </div>
               </div>
             </button>
             <TooltipIconButton
