@@ -109,7 +109,7 @@ export const ThreadManagerProvider: React.FC<ThreadManagerProviderProps> = ({ ch
     localStorage.setItem('current-thread-id', threadId);
   }, []);
 
-  // 更新Thread的最后活跃时间
+  // 更新Thread的最后活跃时间（不改变排序）
   const updateThreadActivity = useCallback((threadId: string) => {
     setThreads(prev => {
       const updated = prev.map(thread =>
@@ -118,13 +118,9 @@ export const ThreadManagerProvider: React.FC<ThreadManagerProviderProps> = ({ ch
           : thread
       );
       
-      // 将活跃的Thread移到列表顶部
-      const activeThread = updated.find(t => t.id === threadId);
-      const otherThreads = updated.filter(t => t.id !== threadId);
-      const sorted = activeThread ? [activeThread, ...otherThreads] : updated;
-      
-      saveThreads(sorted);
-      return sorted;
+      // 保持原有的排序，不将活跃Thread移到顶部
+      saveThreads(updated);
+      return updated;
     });
     
     setCurrentThread(threadId);
