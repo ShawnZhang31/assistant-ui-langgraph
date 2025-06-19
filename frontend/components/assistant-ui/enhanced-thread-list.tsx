@@ -76,7 +76,7 @@ export const EnhancedThreadList: FC = () => {
           <div
             key={thread.id}
             className={`hover:bg-muted focus-visible:bg-muted focus-visible:ring-ring flex items-center gap-2 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 ${
-              currentThreadId === thread.id ? 'bg-muted' : ''
+              currentThreadId === thread.id ? 'bg-primary/20 border border-primary/30' : ''
             }`}
           >
             <button
