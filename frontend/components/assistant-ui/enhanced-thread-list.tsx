@@ -43,6 +43,7 @@ export const EnhancedThreadList: FC = () => {
   const handleDeleteThread = async (threadId: string) => {
     try {
       // 先从API删除
+      console.log("Deleting thread with ID: %s", threadId);
       await deleteThread(threadId);
       // 再从本地状态删除
       removeThread(threadId);

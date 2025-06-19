@@ -14,7 +14,7 @@ export const formatThreadTitle = (threadId: string): string => {
   
   // 否则取后8位字符
 //   return `Thread ${threadId.slice(-8)}`;
-  return `Thread ${threadId}`;
+  return `Thread(${threadId})`;
 };
 
 /**
