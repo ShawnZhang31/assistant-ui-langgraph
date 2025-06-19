@@ -64,9 +64,9 @@ export const formatRelativeTime = (timestamp: string): string => {
   if (diffInMinutes < 1) {
     return 'just now';
   } else if (diffInMinutes < 60) {
-    return `${diffInMinutes} ${diffInMinutes === 1 ? 'min' : 'mins'} ago`;
+    return `${diffInMinutes} ${diffInMinutes === 1 ? 'm' : 'ms'} ago`;
   } else if (diffInHours < 24) {
-    return `${diffInHours} ${diffInHours === 1 ? 'hr' : 'hrs'} ago`;
+    return `${diffInHours} ${diffInHours === 1 ? 'h' : 'hs'} ago`;
   } else {
     return `${diffInDays} ${diffInDays === 1 ? 'd' : 'ds'} ago`;
   }

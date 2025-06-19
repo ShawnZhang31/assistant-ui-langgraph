@@ -88,7 +88,7 @@ export const EnhancedThreadList: FC = () => {
                 {/* <span className="text-xs text-muted-foreground">
                   {getThreadDescription(thread.id, thread.createdAt)}
                 </span> */}
-                <div className="flex gap-0.1 text-xs text-muted-foreground">
+                <div className="flex gap-2 text-xs text-muted-foreground">
                   <span>Created: {formatRelativeTime(thread.createdAt)}</span>
                   <span>Updated: {formatRelativeTime(thread.lastActive)}</span>
                 </div>
