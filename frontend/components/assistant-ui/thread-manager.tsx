@@ -40,17 +40,33 @@ export const ThreadManagerProvider: React.FC<ThreadManagerProviderProps> = ({ ch
   const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // 从localStorage加载Thread列表
+  // 从localStorage加载Thread列表（备选方案）
   const loadThreads = useCallback(() => {
     try {
+      console.log('Loading threads from localStorage as fallback...');
       const savedThreads = localStorage.getItem('assistant-threads');
+      let parsed = [];
       if (savedThreads) {
-        const parsed = JSON.parse(savedThreads);
+        parsed = JSON.parse(savedThreads);
         setThreads(parsed);
+        console.log('Loaded', parsed.length, 'threads from localStorage');
       }
       
       const currentId = localStorage.getItem('current-thread-id');
-      setCurrentThreadId(currentId);
+      
+      // 如果没有当前Thread ID，但有Thread列表，自动选择第一个
+      if (!currentId && parsed.length > 0) {
+        const firstThreadId = parsed[0].id;
+        console.log('Auto-selecting first thread from localStorage:', firstThreadId);
+        setCurrentThreadId(firstThreadId);
+        localStorage.setItem('current-thread-id', firstThreadId);
+      } else if (currentId && parsed.find((thread: any) => thread.id === currentId)) {
+        setCurrentThreadId(currentId);
+        console.log('Restored current thread ID from localStorage:', currentId);
+      } else {
+        setCurrentThreadId(null);
+        console.log('No valid current thread found in localStorage');
+      }
     } catch (error) {
       console.error('Failed to load threads from localStorage:', error);
     }
@@ -155,6 +171,7 @@ export const ThreadManagerProvider: React.FC<ThreadManagerProviderProps> = ({ ch
   const loadThreadsFromAPI = useCallback(async () => {
     setLoading(true);
     try {
+      console.log('Loading threads from API...');
       const response = await getThreadsList();
       const apiThreads = response.map((thread: any) => ({
         id: thread.thread_id,
@@ -163,34 +180,57 @@ export const ThreadManagerProvider: React.FC<ThreadManagerProviderProps> = ({ ch
         lastActive: thread.updated_at || new Date().toISOString(),
       }));
       
-      // 合并本地和API的Thread，API的Thread为准
-      setThreads(prev => {
-        const merged = [...apiThreads];
-        // 添加本地有但API没有的Thread（可能是新创建的）
-        prev.forEach(localThread => {
-          if (!apiThreads.find(apiThread => apiThread.id === localThread.id)) {
-            merged.push(localThread);
-          }
-        });
-        
-        // 按最后活跃时间排序
-        merged.sort((a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime());
-        
-        saveThreads(merged);
-        return merged;
-      });
+      console.log('Loaded', apiThreads.length, 'threads from API');
+      
+      // 直接使用API数据，不再合并本地数据
+      // 按最后活跃时间排序
+      apiThreads.sort((a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime());
+      
+      // 设置Thread列表
+      setThreads(apiThreads);
+      saveThreads(apiThreads);
+      
+      // 恢复当前Thread ID（如果存在且在API数据中）
+      const savedCurrentId = localStorage.getItem('current-thread-id');
+      if (savedCurrentId && apiThreads.find(thread => thread.id === savedCurrentId)) {
+        setCurrentThreadId(savedCurrentId);
+        console.log('Restored current thread ID:', savedCurrentId);
+      } else if (apiThreads.length > 0) {
+        // 如果没有保存的current thread或已不存在，选择第一个
+        const firstThreadId = apiThreads[0].id;
+        setCurrentThreadId(firstThreadId);
+        localStorage.setItem('current-thread-id', firstThreadId);
+        console.log('Auto-selected first thread as current:', firstThreadId);
+      } else {
+        setCurrentThreadId(null);
+        localStorage.removeItem('current-thread-id');
+      }
+      
     } catch (error) {
       console.error('Failed to load threads from API:', error);
+      throw error; // 重新抛出错误，让调用者知道API加载失败
     } finally {
       setLoading(false);
     }
   }, [saveThreads]);
 
-  // 组件挂载时加载数据
+  // 组件挂载时加载数据（优先从API加载）
   useEffect(() => {
-    loadThreads();
-    // 也尝试从API加载Thread列表
-    loadThreadsFromAPI();
+    const initializeThreads = async () => {
+      console.log('Initializing threads - loading from API first');
+      
+      try {
+        // 首先尝试从API加载Thread列表
+        await loadThreadsFromAPI();
+        console.log('Successfully loaded threads from API');
+      } catch (error) {
+        console.error('Failed to load threads from API, falling back to localStorage:', error);
+        // 如果API加载失败，使用本地数据作为备选
+        loadThreads();
+      }
+    };
+
+    initializeThreads();
   }, [loadThreads, loadThreadsFromAPI]);
 
   const value: ThreadManagerContextType = {
