@@ -125,34 +125,34 @@ const AssistantWithThreadManager = () => {
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <div className="flex flex-col min-h-screen">
-      <div className="flex-1">
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Build Your Own ChatGPT UX
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>
-                    Starter Template
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </header>
-          <Thread />
-        </SidebarInset>
-      </SidebarProvider>
-      </div>
-        <footer className="border-t px-4 py-3 text-center text-sm text-muted-foreground bg-background relative z-50">
+        <div className="flex-1 pb-16">
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+              <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+                <SidebarTrigger />
+                <Separator orientation="vertical" className="mr-2 h-4" />
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem className="hidden md:block">
+                      <BreadcrumbLink href="#">
+                        Build Your Own ChatGPT UX
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>
+                        Starter Template
+                      </BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </header>
+              <Thread />
+            </SidebarInset>
+          </SidebarProvider>
+        </div>
+        <footer className="fixed bottom-0 left-0 right-0 border-t px-4 py-3 text-center text-sm text-muted-foreground bg-background z-50">
           Developed by JoinAI Team using assistant-ui
         </footer>
       </div>
