@@ -16,7 +16,7 @@ interface ThreadManagerContextType {
   addThread: (threadId: string, title?: string) => void;
   removeThread: (threadId: string) => void;
   setCurrentThread: (threadId: string) => void;
-  updateThreadActivity: (threadId: string) => void;
+  updateThreadActivity: (threadId: string, lastActive?: string) => Promise<void>;
   updateThreadTitle: (threadId: string, title: string) => void;
   loadThreadsFromAPI: () => Promise<void>;
 }
@@ -110,11 +110,25 @@ export const ThreadManagerProvider: React.FC<ThreadManagerProviderProps> = ({ ch
   }, []);
 
   // 更新Thread的最后活跃时间（不改变排序）
-  const updateThreadActivity = useCallback((threadId: string) => {
+  const updateThreadActivity = useCallback(async (threadId: string, lastActive?: string) => {
+    let updatedTime = lastActive;
+    
+    // 如果没有提供lastActive时间，从API获取真实的updated时间
+    if (!updatedTime) {
+      try {
+        const response = await getThreadsList();
+        const threadData = response.find((thread: any) => thread.thread_id === threadId);
+        updatedTime = threadData?.updated_at || new Date().toISOString();
+      } catch (error) {
+        console.error('Failed to get thread updated time from API:', error);
+        updatedTime = new Date().toISOString(); // 降级到当前时间
+      }
+    }
+    
     setThreads(prev => {
       const updated = prev.map(thread =>
         thread.id === threadId
-          ? { ...thread, lastActive: new Date().toISOString() }
+          ? { ...thread, lastActive: updatedTime }
           : thread
       );
       

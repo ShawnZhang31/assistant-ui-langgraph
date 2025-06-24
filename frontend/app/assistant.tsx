@@ -98,7 +98,9 @@ const AssistantWithThreadManager = () => {
         // 切换到指定线程时，更新 threadIdRef 并返回当前线程的消息状态
         threadIdRef.current = threadId;
         setCurrentThread(threadId); // 更新ThreadManager的当前Thread
-        updateThreadActivity(threadId); // 更新Thread活跃状态
+        
+        // 不传递lastActive参数，让updateThreadActivity从API获取真实的updated时间
+        updateThreadActivity(threadId); // 会从getThreadsList API获取真实的updated_at
         
         // 使用专门的工具函数来安全地提取消息
         const messages = extractMessagesFromThreadState(state);
@@ -112,7 +114,7 @@ const AssistantWithThreadManager = () => {
         // 如果获取Thread状态失败，返回空数组避免错误
         threadIdRef.current = threadId;
         setCurrentThread(threadId);
-        updateThreadActivity(threadId);
+        updateThreadActivity(threadId); // 这里不传递时间，会从API重新获取
         return { messages: [] };
       }
     },
