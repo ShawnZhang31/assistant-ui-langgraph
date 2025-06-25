@@ -11,6 +11,7 @@ const createClient = () => {
     new URL("/api", window.location.href).href;
   return new Client({
     apiUrl,
+    apiKey: process.env["NEXT_PUBLIC_LANGGRAPH_API_KEY"] || "",
   });
 };
 
