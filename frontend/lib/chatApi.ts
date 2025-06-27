@@ -15,6 +15,12 @@ const createClient = () => {
   });
 };
 
+// Function to create a new assistant in the LangGraph API
+export const createAssistant = async (graphId: string) => {
+  const client = createClient();
+  return client.assistants.create({ graphId });
+};
+
 // Function to create a new thread in the LangGraph API
 export const createThread = async () => {
   const client = createClient();
