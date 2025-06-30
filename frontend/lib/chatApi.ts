@@ -1,4 +1,7 @@
 import { Client, ThreadState} from "@langchain/langgraph-sdk";
+import { createHeaders } from "@/lib/joinAI";
+
+
 import {
   LangChainMessage,
   LangGraphCommand,
@@ -9,9 +12,17 @@ const createClient = () => {
   const apiUrl =
     process.env["NEXT_PUBLIC_LANGGRAPH_API_URL"] ||
     new URL("/api", window.location.href).href;
+
+  // 创建JOINAI鉴权头
+  const joinAIHeaders = createHeaders(
+    process.env["JOINAI_APP_ID"] || "your_app_id",
+    process.env["JOINAI_APP_SECRET"] || "your_app_secret",
+    process.env["JOINAI_HOST"] || "http://"
+  );
+    
   return new Client({
     apiUrl,
-    apiKey: process.env["NEXT_PUBLIC_LANGGRAPH_API_KEY"] || "",
+    defaultHeaders: joinAIHeaders
   });
 };
 

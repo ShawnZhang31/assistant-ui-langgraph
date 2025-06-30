@@ -40,16 +40,24 @@ async function handleRequest(req: NextRequest, method: string, pathSegments: str
     // console.log(`queryString: ${queryString}`);
     // console.log(`target url: ${process.env["LANGGRAPH_API_URL"]}/${path}${queryString}`);
 
+
+    // // 创建JOINAI鉴权头
+    // const joinAIHeaders = createHeaders(
+    //   process.env["JOINAI_APP_ID"] || "your_app_id",
+    //   process.env["JOINAI_APP_SECRET"] || "your_app_secret",
+    //   process.env["JOINAI_HOST"] || "http://"
+    // );
+
     const options: RequestInit = {
       method,
       headers: {
         ...Object.fromEntries(req.headers.entries()),
         "Content-Type": "application/json",
-        "x-api-key": process.env["LANGCHAIN_API_KEY"] || "sk-",
+        "x-api-key": process.env["LANGCHAIN_API_KEY"] || "",
       },
     };
 
-    console.log(`options: ${JSON.stringify(options)}`);
+    // console.log(`options: ${JSON.stringify(options)}`);
 
     if (["POST", "PUT", "PATCH"].includes(method)) {
       options.body = await req.text();
