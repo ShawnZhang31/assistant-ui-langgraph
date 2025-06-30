@@ -21,10 +21,13 @@ async function handleRequest(req: NextRequest, method: string) {
       ? `?${searchParams.toString()}`
       : "";
 
+
     const options: RequestInit = {
       method,
       headers: {
-        "x-api-key": process.env["LANGCHAIN_API_KEY"] || "",
+        ...Object.fromEntries(req.headers.entries()),
+        "Content-Type": "application/json",
+        "x-api-key": process.env["LANGCHAIN_API_KEY"] || "sk-",
       },
     };
 
@@ -33,7 +36,7 @@ async function handleRequest(req: NextRequest, method: string) {
     }
 
     const res = await fetch(
-      `${process.env["LANGGRAPH_API_URL"]}/${path}${queryString}`,
+      `${process.env["LANGGRAPH_API_URL"]}/${path}`,
       options,
     );
 
