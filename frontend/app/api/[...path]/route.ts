@@ -15,8 +15,8 @@ async function handleRequest(req: NextRequest, method: string) {
     const path = req.nextUrl.pathname.replace(/^\/?api\//, "");
     const url = new URL(req.url);
     const searchParams = new URLSearchParams(url.search);
-    searchParams.delete("_path");
-    searchParams.delete("nxtP_path");
+    // searchParams.delete("_path");
+    // searchParams.delete("nxtP_path");
     const queryString = searchParams.toString()
       ? `?${searchParams.toString()}`
       : "";
@@ -35,8 +35,14 @@ async function handleRequest(req: NextRequest, method: string) {
       options.body = await req.text();
     }
 
+    console.log(`req.url: ${req.url}`);
+    console.log(`path: ${path}`);
+    console.log(`queryString: ${queryString}`);
+    console.log(`options: ${JSON.stringify(options)}`);
+    console.log(`target url: ${process.env["LANGGRAPH_API_URL"]}/${path}${queryString}`);
+
     const res = await fetch(
-      `${process.env["LANGGRAPH_API_URL"]}/${path}`,
+      `${process.env["LANGGRAPH_API_URL"]}/${path}${queryString}`,
       options,
     );
 
