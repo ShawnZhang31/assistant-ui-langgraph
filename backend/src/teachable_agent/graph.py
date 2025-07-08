@@ -8,7 +8,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, StateGraph
 from langgraph.store.base import BaseStore
-from langgraph.prebuilt import ToolNode
+from langgraph.prebuilt import ToolNode, create_react_agent
 
 from teachable_agent import configuration, tools, utils
 from teachable_agent.state import State
@@ -106,14 +106,29 @@ def route_message(state: State):
 # Create the graph + all nodes
 builder = StateGraph(State, config_schema=configuration.Configuration)
 
-# Define the flow of the memory extraction process
-builder.add_node("call_model", call_model)
-builder.add_node("tool_node", tool_node)
-builder.add_edge("__start__", "call_model")
-builder.add_edge("tool_node", "call_model")
-builder.add_conditional_edges("call_model", route_message, ["tool_node", "__end__"])
+# 创建一个子图
+sub_graph = create_react_agent(
+    name="TeachableAgent",
+    prompt="You are a helpful assistant. You can answer questions and provide information based on the user's input.",
+    model=init_chat_model(**utils.split_model_and_provider(configuration.Configuration.model)),
+    tools=[tools.get_weather, tools.get_news, tools.get_joke],
+)
 
-graph = builder.compile()
+# # Define the flow of the memory extraction process
+# builder.add_node("call_model", call_model)
+# builder.add_node("tool_node", tool_node)
+# builder.add_edge("__start__", "call_model")
+# builder.add_edge("tool_node", "call_model")
+# builder.add_conditional_edges("call_model", route_message, ["tool_node", "__end__"])
+
+
+builder.add_node("sub_graph", sub_graph)
+builder.add_edge("__start__", "sub_graph")
+builder.add_edge("sub_graph", END)
+
+
+
+graph = builder.compile().with_config()
 graph.name = "TeachableAgent"
 
 
