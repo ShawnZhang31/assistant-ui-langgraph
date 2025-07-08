@@ -46,7 +46,7 @@ export const createThread = async () => {
 export const getThreadState = async (threadId: string) => {
   const client = createClient();
   try {
-    const state = await client.threads.getState(threadId);
+    const state = await client.threads.getState(threadId, undefined, {subgraphs: true});
     console.log('Thread state for', threadId, ':', JSON.stringify(state, null, 2));
     return state;
   } catch (error) {
@@ -85,6 +85,7 @@ export const sendMessage = async (params: {
         : null,
       command: params.command,
       streamMode: ["messages", "updates"],
+      streamSubgraphs: true,
     }
   );
 };
