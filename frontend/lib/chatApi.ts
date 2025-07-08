@@ -17,9 +17,13 @@ const createClient = () => {
   const joinAIHeaders = createHeaders(
     process.env["JOINAI_APP_ID"] || "your_app_id",
     process.env["JOINAI_APP_SECRET"] || "your_app_secret",
-    process.env["JOINAI_HOST"] || "http://"
+    process.env["JOINAI_HOST"] || "http://shawnzhang31.com"
   );
-    
+  // 打印JOINAI鉴权头
+  // 注意：在生产环境中，可能不需要打印敏感信息
+  // 但在开发环境中，打印可以帮助调试
+
+  console.log(`joinAIHeaders: ${JSON.stringify(joinAIHeaders, null, 2)}`);
   return new Client({
     apiUrl,
     defaultHeaders: joinAIHeaders

@@ -35,10 +35,10 @@ export function createHeaders(
   ].join(', ')
 
   return {
-    authorization,
-    date,
-    host,
-    appId
+    "authorization": authorization,
+    "date": date,
+    "host": host,
+    "appId": appId
   }
 }
 

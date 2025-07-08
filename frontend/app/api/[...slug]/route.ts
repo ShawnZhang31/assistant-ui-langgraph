@@ -33,31 +33,52 @@ async function handleRequest(req: NextRequest, method: string, pathSegments: str
       ? `?${searchParams.toString()}`
       : "";
 
-    // console.log(`pathSegments: ${pathSegments}`);
-    // console.log(`req.url: ${req.url}`);
-    // console.log(`path: ${path}`);
-    // console.log(`searchParams: ${searchParams.toString()}`);
-    // console.log(`queryString: ${queryString}`);
-    // console.log(`target url: ${process.env["LANGGRAPH_API_URL"]}/${path}${queryString}`);
+    console.log(`pathSegments: ${pathSegments}`);
+    console.log(`req.url: ${req.url}`);
+    console.log(`path: ${path}`);
+    console.log(`searchParams: ${searchParams.toString()}`);
+    console.log(`queryString: ${queryString}`);
+    console.log(`target url: ${process.env["LANGGRAPH_API_URL"]}/${path}${queryString}`);
 
+    // console.log(`origin headers: ${JSON.stringify(req.headers.entries(), null, 2)}`);
+    // 打印原始请求的headers
+    for (const [key, value] of req.headers.entries()) {
+      console.log(`Header: ${key} = ${value}`);
+    }
 
-    // // 创建JOINAI鉴权头
-    // const joinAIHeaders = createHeaders(
-    //   process.env["JOINAI_APP_ID"] || "your_app_id",
-    //   process.env["JOINAI_APP_SECRET"] || "your_app_secret",
-    //   process.env["JOINAI_HOST"] || "http://"
-    // );
+    // 只挑出我们真正要透传的 headers
+    const allowed = new Set([
+      "content-type",
+      "authorization",  // 如果需要 HMAC 验签
+      "appid",          // 你自定义的 appid
+      // "date",          // 如果需要时间戳
+      // "host",          // 如果需要主机名
+      // … 其他确实要透传的自定义头 …
+    ]);
+    const incoming: Record<string, string> = {};
+
+    for (const [key, value] of req.headers.entries()) {
+      if (key.toLowerCase() === "j-host") {
+        incoming["j-host"] = value;
+      }
+      if (key.toLowerCase() === "j-date") {
+        incoming["j-date"] = value;
+      }
+      if (allowed.has(key.toLowerCase())) {
+        incoming[key] = value;
+      }
+    }
 
     const options: RequestInit = {
       method,
       headers: {
-        ...Object.fromEntries(req.headers.entries()),
-        "Content-Type": "application/json",
+        ...incoming,
+        // "Content-Type": "application/json",
         "x-api-key": process.env["LANGCHAIN_API_KEY"] || "",
       },
     };
 
-    // console.log(`options: ${JSON.stringify(options)}`);
+    console.log(`options: ${JSON.stringify(options)}`);
 
     if (["POST", "PUT", "PATCH"].includes(method)) {
       options.body = await req.text();
